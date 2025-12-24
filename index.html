@@ -6,9 +6,9 @@
     <title>有集貿易暨可塗設計--聖誕節交換禮物遊戲</title>
     <style>
         :root {
-            --primary-color: #E63946; /* 聖誕紅 */
+            --primary-color: #E63946;
             --bg-gradient: linear-gradient(135deg, #1D3557 0%, #457b9d 100%);
-            --accent-color: #F1FAEE; /* 雪白 */
+            --accent-color: #F1FAEE;
             --gold: #FFD700;
         }
 
@@ -22,6 +22,45 @@
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
+        }
+
+        /* --- 開場畫面 (解決音樂播放問題) --- */
+        #startScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(29, 53, 87, 0.95);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+        }
+
+        .start-btn {
+            padding: 20px 50px;
+            font-size: 2rem;
+            background: var(--primary-color);
+            color: white;
+            border: 4px solid var(--gold);
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(230, 57, 70, 0.6);
+            animation: pulse 1.5s infinite;
+            font-weight: bold;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(230, 57, 70, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
         }
 
         header {
@@ -46,7 +85,6 @@
             letter-spacing: 2px;
         }
 
-        /* 音樂控制按鈕 */
         .audio-control {
             position: absolute;
             top: 20px;
@@ -78,7 +116,6 @@
             padding-bottom: 50px;
         }
 
-        /* 左側控制區 */
         .controls {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -99,7 +136,7 @@
         label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem; }
         
         input[type="number"] {
-            width: 60%;
+            width: 50%;
             padding: 8px;
             border-radius: 5px;
             border: none;
@@ -107,7 +144,7 @@
         }
 
         .btn-small {
-            width: 35%;
+            width: 40%;
             padding: 8px;
             background: var(--gold);
             color: #1D3557;
@@ -155,8 +192,7 @@
             position: relative;
             overflow: hidden;
         }
-        
-        /* 按鈕閃光動畫 */
+
         .btn-spin::after {
             content: '';
             position: absolute;
@@ -167,12 +203,10 @@
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
             animation: shine 3s infinite;
         }
-
         @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
 
         .btn:disabled { background-color: #888; cursor: not-allowed; opacity: 0.6; animation: none; }
 
-        /* 右側轉盤區 */
         .wheel-wrapper {
             position: relative;
             width: 500px;
@@ -186,10 +220,8 @@
             height: 100%;
             border-radius: 50%;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            transition: transform 0s; /* 改由 JS 控制動畫以同步聲音 */
         }
 
-        /* 指針 */
         .pointer {
             position: absolute;
             top: -25px;
@@ -204,7 +236,6 @@
             filter: drop-shadow(0 4px 2px rgba(0,0,0,0.3));
         }
 
-        /* 結果彈窗 */
         .modal {
             display: none;
             position: fixed;
@@ -235,7 +266,6 @@
         .winner-text { font-size: 3.5rem; color: var(--primary-color); font-weight: bold; margin: 15px 0; word-break: break-all; }
 
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
         .status { margin-top: 15px; text-align: center; font-size: 1.1rem; color: var(--gold); font-weight: bold; }
 
         @media (max-width: 768px) {
@@ -249,6 +279,12 @@
 </head>
 <body>
 
+    <div id="startScreen">
+        <h1 style="margin-bottom: 30px; font-size: 3rem;">🎄 聖誕交換禮物</h1>
+        <button class="start-btn" onclick="enterGame()">👉 進入會場</button>
+        <p style="margin-top: 20px; color: #ccc;">點擊按鈕開啟音樂與遊戲</p>
+    </div>
+
     <audio id="bgm" loop>
         <source src="https://upload.wikimedia.org/wikipedia/commons/5/52/Jingle_Bells_%28Kevin_MacLeod%29_%28Source_2%29.ogg" type="audio/ogg">
     </audio>
@@ -256,18 +292,18 @@
     <header>
         <h1>有集貿易暨可塗設計</h1>
         <div class="subtitle">聖誕節交換禮物遊戲 🎄</div>
-        <button class="audio-control" id="bgmBtn" onclick="toggleBGM()">🎵 音樂：關</button>
+        <button class="audio-control" id="bgmBtn" onclick="toggleBGM()">🎵 音樂：開</button>
     </header>
 
     <div class="container">
         <div class="controls">
             <div class="input-group">
                 <label>🔢 快速產生號碼</label>
-                <input type="number" id="countInput" placeholder="輸入人數 (如: 50)" min="2">
+                <input type="number" id="countInput" placeholder="人數" min="2">
                 <button class="btn-small" onclick="fastGenerate()">產生</button>
             </div>
 
-            <label>📝 參加名單 (可手動修改)</label>
+            <label>📝 參加名單</label>
             <textarea id="namesInput" placeholder="001&#10;002&#10;王小明..."></textarea>
             
             <button class="btn btn-setup" onclick="initWheel()">🔄 更新轉盤設定</button>
@@ -277,7 +313,7 @@
             
             <div style="margin-top:20px; font-size: 0.8rem; color: #ccc;">
                 * 抽中後號碼自動移除<br>
-                * 轉動時請打開喇叭 🔊
+                * 請確保音樂已開啟
             </div>
         </div>
 
@@ -313,15 +349,39 @@
         const bgm = document.getElementById('bgm');
         const bgmBtn = document.getElementById('bgmBtn');
         
-        // 簡單的音效合成 (Web Audio API) - 避免外部檔案依賴
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
+        // 進入遊戲：處理瀏覽器音效限制
+        function enterGame() {
+            // 1. 播放背景音樂
+            bgm.volume = 0.5;
+            bgm.play().then(() => {
+                bgmBtn.classList.add('playing');
+                bgmBtn.innerHTML = "🎵 音樂：開";
+            }).catch(e => {
+                console.log("音樂播放失敗，請手動開啟");
+            });
+
+            // 2. 喚醒音效引擎 (Safari 需要)
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // 3. 隱藏開場畫面
+            const screen = document.getElementById('startScreen');
+            screen.style.opacity = '0';
+            setTimeout(() => {
+                screen.style.display = 'none';
+            }, 500);
+        }
+
+        // 音效產生器
         function playTickSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime); // 高音
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
             gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
@@ -333,18 +393,17 @@
 
         function playWinSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            // 簡單的三連音
-            [440, 554, 659].forEach((freq, i) => {
+            [440, 554, 659, 880].forEach((freq, i) => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
                 osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.5, audioCtx.currentTime + i*0.15);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i*0.15 + 0.4);
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime + i*0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i*0.1 + 0.5);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                osc.start(audioCtx.currentTime + i*0.15);
-                osc.stop(audioCtx.currentTime + i*0.15 + 0.4);
+                osc.start(audioCtx.currentTime + i*0.1);
+                osc.stop(audioCtx.currentTime + i*0.1 + 0.5);
             });
         }
 
@@ -363,14 +422,11 @@
             '#F4A261', '#2A9D8F', '#E9C46A', '#FF006E', '#8338EC'
         ];
 
-        // 背景音樂控制
         function toggleBGM() {
             if (bgm.paused) {
-                bgm.volume = 0.5; // 音量適中
-                bgm.play().then(() => {
-                    bgmBtn.innerHTML = "🎵 音樂：開";
-                    bgmBtn.classList.add('playing');
-                }).catch(e => alert("請先與頁面互動（點擊任意處）才能播放音樂"));
+                bgm.play();
+                bgmBtn.innerHTML = "🎵 音樂：開";
+                bgmBtn.classList.add('playing');
             } else {
                 bgm.pause();
                 bgmBtn.innerHTML = "🎵 音樂：關";
@@ -378,7 +434,6 @@
             }
         }
 
-        // 快速產生號碼
         function fastGenerate() {
             const count = parseInt(document.getElementById('countInput').value);
             if (!count || count < 2) {
@@ -387,7 +442,6 @@
             }
             let arr = [];
             for(let i=1; i<=count; i++) {
-                // 補零 (001, 002...)
                 arr.push(String(i).padStart(3, '0'));
             }
             document.getElementById('namesInput').value = arr.join('\n');
@@ -420,12 +474,11 @@
             const textRadius = 160;
             const insideRadius = 0;
 
-            // 清除畫布並旋轉到目前角度
             ctx.clearRect(0, 0, 500, 500);
             
             ctx.save();
             ctx.translate(250, 250);
-            ctx.rotate(currentRotation); // 整個轉盤旋轉
+            ctx.rotate(currentRotation);
             ctx.translate(-250, -250);
 
             ctx.strokeStyle = "white";
@@ -462,16 +515,14 @@
         function startSpin() {
             if (isSpinning) return;
             
-            // 如果音樂沒開，嘗試自動開啟（如果瀏覽器允許）
-            if(bgm.paused) {
-                toggleBGM();
-            }
+            // 確保音效引擎運行
+            if (audioCtx.state === 'suspended') audioCtx.resume();
 
             isSpinning = true;
             spinBtn.disabled = true;
-            spinAngleStart = Math.random() * 0.2 + 0.3; // 初始速度
+            spinAngleStart = Math.random() * 0.2 + 0.3;
             spinTime = 0;
-            spinTimeTotal = Math.random() * 3000 + 5000; // 5~8秒
+            spinTimeTotal = Math.random() * 3000 + 5000;
             
             requestAnimationFrame(rotateWheel);
         }
@@ -485,12 +536,9 @@
                 return;
             }
             
-            // 減速邏輯
             const spinAngle = (spinAngleStart * (1 - spinTime / spinTimeTotal));
-            currentRotation += spinAngle; // 增加旋轉角度
+            currentRotation += spinAngle;
             
-            // 音效邏輯：每轉過一定角度播放一次
-            // 這裡用簡單的檢查：如果旋轉角度累積超過 0.5 弧度（約30度）就響一聲
             if (currentRotation - lastSoundAngle > 0.4) {
                 playTickSound();
                 lastSoundAngle = currentRotation;
@@ -502,13 +550,8 @@
 
         function stopRotateWheel() {
             isSpinning = false;
-            playWinSound(); // 播放勝利音效
+            playWinSound();
 
-            // 計算結果
-            // 實際角度 = currentRotation % 2PI
-            // 指針在上方 (270度 / 1.5PI)，但因為我們旋轉的是 canvas，
-            // 我們需要計算哪個扇區現在位於 1.5PI (上方)
-            
             const degrees = currentRotation * 180 / Math.PI + 90;
             const arcd = arc * 180 / Math.PI;
             const index = Math.floor((360 - (degrees % 360)) % 360 / arcd);
@@ -529,7 +572,7 @@
             if (participants.length > 0) {
                 arc = Math.PI * 2 / participants.length;
                 startAngle = 0;
-                currentRotation = 0; // 重置轉盤角度看起來比較整齊
+                currentRotation = 0;
                 lastSoundAngle = 0;
                 drawWheel();
                 statusText.innerText = `目前人數：${participants.length} 人`;
@@ -546,10 +589,8 @@
             }
         }
         
-        function closeModal() { document.getElementById('resultModal').style.display = 'none'; }
         function closeEndModal() { document.getElementById('endModal').style.display = 'none'; }
         
-        // 初始繪製空盤
         drawWheel();
     </script>
 </body>
