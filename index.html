@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>有集貿易暨可塗設計--聖誕節交換禮物遊戲</title>
+    <title>聖誕節交換禮物遊戲 - 有集貿易暨可塗設計</title>
     <style>
         :root {
             --primary-color: #E63946;
@@ -22,17 +22,64 @@
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
+            overflow-y: hidden; /* 防止動畫導致卷軸出現 */
         }
 
-        /* --- 開場畫面 (解決音樂播放問題) --- */
+        /* --- 動畫角色圖片 (隱藏備用) --- */
+        .anim-actor {
+            position: fixed;
+            z-index: 2000; /* 在最上層 */
+            display: none;
+            pointer-events: none; /* 讓滑鼠可以穿透圖片點擊下方按鈕 */
+        }
+
+        /* 聖誕老人動畫設定 */
+        #santaClaus {
+            width: 400px; /* 大小 */
+            top: 20%;
+            left: -500px;
+        }
+        .anim-fly-right {
+            display: block !important;
+            animation: flyRight 4s linear forwards;
+        }
+        @keyframes flyRight {
+            0% { left: -500px; transform: translateY(0); }
+            25% { transform: translateY(-20px); }
+            50% { transform: translateY(0); }
+            75% { transform: translateY(20px); }
+            100% { left: 100vw; transform: translateY(0); }
+        }
+
+        /* 鈴鐺動畫設定 */
+        #bells {
+            width: 250px;
+            top: -300px;
+            left: 50%; /* 置中掉落 */
+            transform: translateX(-50%);
+        }
+        .anim-drop-down {
+            display: block !important;
+            animation: dropDown 3s ease-in-out forwards;
+        }
+        @keyframes dropDown {
+            0% { top: -300px; opacity: 0; }
+            20% { top: 20%; opacity: 1; transform: translateX(-50%) rotate(10deg); }
+            40% { transform: translateX(-50%) rotate(-10deg); }
+            60% { transform: translateX(-50%) rotate(5deg); }
+            80% { top: 20%; opacity: 1; }
+            100% { top: 120vh; opacity: 0; }
+        }
+
+        /* --- 開場畫面 --- */
         #startScreen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(29, 53, 87, 0.95);
-            z-index: 2000;
+            background: rgba(29, 53, 87, 0.98);
+            z-index: 3000;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -41,89 +88,71 @@
         }
 
         .start-btn {
-            padding: 20px 50px;
-            font-size: 2rem;
+            padding: 20px 60px;
+            font-size: 2.5rem;
             background: var(--primary-color);
             color: white;
             border: 4px solid var(--gold);
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 0 30px rgba(230, 57, 70, 0.6);
+            box-shadow: 0 0 40px rgba(230, 57, 70, 0.8);
             animation: pulse 1.5s infinite;
             font-weight: bold;
         }
 
-        .start-btn:hover {
-            transform: scale(1.1);
-        }
-
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(230, 57, 70, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.7); transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 20px rgba(230, 57, 70, 0); transform: scale(1); }
         }
 
+        /* --- 標題區域調整 (依需求修改) --- */
         header {
             text-align: center;
-            padding: 20px;
+            padding: 30px 20px;
             width: 100%;
-            background: rgba(0,0,0,0.2);
-            position: relative;
+            background: rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+
+        .company-title {
+            font-size: 1.5rem; /* 較小 */
+            color: var(--gold);
+            letter-spacing: 3px;
+            font-weight: normal;
+            margin-bottom: 10px;
+            opacity: 0.9;
         }
 
         h1 {
             margin: 0;
-            font-size: 2rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            color: var(--gold);
-        }
-
-        .subtitle {
-            font-size: 1rem;
-            opacity: 0.9;
-            margin-top: 5px;
-            letter-spacing: 2px;
-        }
-
-        .audio-control {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid white;
+            font-size: 4rem; /* 較大 */
+            text-shadow: 0 4px 10px rgba(0,0,0,0.6);
             color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: 0.3s;
+            font-weight: 900;
+            line-height: 1.2;
         }
-        .audio-control:hover { background: rgba(255,255,255,0.4); }
-        .audio-control.playing { background: var(--gold); color: #1D3557; border-color: var(--gold); }
 
+        /* --- 容器與佈局 --- */
         .container {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-items: flex-start;
-            gap: 40px;
+            gap: 50px;
             width: 95%;
-            max-width: 1200px;
-            margin-top: 30px;
+            max-width: 1400px;
             padding-bottom: 50px;
         }
 
         .controls {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            padding: 25px;
-            border-radius: 15px;
+            padding: 30px;
+            border-radius: 20px;
             width: 320px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .input-group {
@@ -134,26 +163,8 @@
         }
 
         label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem; }
-        
-        input[type="number"] {
-            width: 50%;
-            padding: 8px;
-            border-radius: 5px;
-            border: none;
-            font-size: 1rem;
-        }
-
-        .btn-small {
-            width: 40%;
-            padding: 8px;
-            background: var(--gold);
-            color: #1D3557;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            float: right;
-        }
+        input[type="number"] { width: 50%; padding: 8px; border-radius: 5px; border: none; font-size: 1rem; }
+        .btn-small { width: 40%; padding: 8px; background: var(--gold); color: #1D3557; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; float: right; }
 
         textarea {
             width: 100%;
@@ -163,54 +174,43 @@
             border: none;
             padding: 10px;
             font-size: 16px;
-            box-sizing: border-box;
             background: rgba(255,255,255,0.9);
             color: #333;
+            box-sizing: border-box;
         }
 
         .btn {
             display: block;
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
+            padding: 15px;
+            margin: 15px 0;
             border: none;
-            border-radius: 8px;
-            font-size: 1.2rem;
+            border-radius: 10px;
+            font-size: 1.3rem;
             cursor: pointer;
-            transition: all 0.2s;
             font-weight: bold;
+            transition: 0.2s;
         }
 
-        .btn-setup { background-color: #457b9d; color: white; }
+        .btn-setup { background-color: #457b9d; color: white; font-size: 1.1rem; }
         
         .btn-spin {
             background-color: var(--primary-color);
             color: white;
-            font-size: 1.6rem;
-            box-shadow: 0 4px 15px rgba(230, 57, 70, 0.4);
-            margin-top: 15px;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 15px rgba(230, 57, 70, 0.5);
+            margin-top: 25px;
             position: relative;
             overflow: hidden;
         }
 
-        .btn-spin::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shine 3s infinite;
-        }
-        @keyframes shine { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
-
-        .btn:disabled { background-color: #888; cursor: not-allowed; opacity: 0.6; animation: none; }
+        .btn-spin:active { transform: scale(0.98); }
+        .btn:disabled { background-color: #888; cursor: not-allowed; opacity: 0.6; }
 
         .wheel-wrapper {
             position: relative;
-            width: 500px;
-            height: 500px;
+            width: 550px;
+            height: 550px;
             max-width: 90vw;
             max-height: 90vw;
         }
@@ -219,23 +219,24 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px rgba(0,0,0,0.6);
         }
 
         .pointer {
             position: absolute;
-            top: -25px;
+            top: -30px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 25px solid transparent;
-            border-right: 25px solid transparent;
-            border-top: 50px solid var(--gold);
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-top: 60px solid var(--gold);
             z-index: 10;
-            filter: drop-shadow(0 4px 2px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4));
         }
 
+        /* 結果彈窗 */
         .modal {
             display: none;
             position: fixed;
@@ -243,46 +244,51 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.8);
             justify-content: center;
             align-items: center;
-            z-index: 999;
+            z-index: 1000; /* 比動畫層級低一點，讓動畫飛在上面，或可調整 */
         }
 
         .modal-content {
             background: white;
             color: #333;
-            padding: 40px;
-            border-radius: 20px;
+            padding: 50px;
+            border-radius: 25px;
             text-align: center;
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             max-width: 90%;
-            width: 400px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            border: 5px solid var(--primary-color);
+            width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            border: 8px solid var(--primary-color);
         }
 
-        .winner-title { font-size: 1.5rem; color: #666; margin: 0; }
-        .winner-text { font-size: 3.5rem; color: var(--primary-color); font-weight: bold; margin: 15px 0; word-break: break-all; }
+        .winner-title { font-size: 2rem; color: #666; margin: 0; }
+        .winner-text { font-size: 5rem; color: var(--primary-color); font-weight: 900; margin: 20px 0; word-break: break-all; line-height: 1; }
 
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .status { margin-top: 15px; text-align: center; font-size: 1.1rem; color: var(--gold); font-weight: bold; }
+        .status { margin-top: 15px; text-align: center; font-size: 1.2rem; color: var(--gold); font-weight: bold; }
 
         @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .company-title { font-size: 1.2rem; }
             .container { flex-direction: column-reverse; align-items: center; }
             .controls { width: 90%; }
             .wheel-wrapper { width: 350px; height: 350px; }
-            h1 { font-size: 1.5rem; }
-            .audio-control { top: 10px; right: 10px; font-size: 0.8rem; }
+            #santaClaus { width: 250px; }
+            #bells { width: 150px; }
         }
     </style>
 </head>
 <body>
 
+    <img id="santaClaus" class="anim-actor" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Santa_Claus_sleigh_reindeer.svg/1280px-Santa_Claus_sleigh_reindeer.svg.png" alt="Santa">
+    <img id="bells" class="anim-actor" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Christmas_mistletoe.svg/1024px-Christmas_mistletoe.svg.png" alt="Bells">
+
     <div id="startScreen">
-        <h1 style="margin-bottom: 30px; font-size: 3rem;">🎄 聖誕交換禮物</h1>
+        <h1 style="font-size: 5rem; margin-bottom: 10px;">🎄 尾牙抽獎</h1>
+        <div style="font-size: 1.5rem; color: var(--gold); margin-bottom: 40px; letter-spacing: 5px;">有集貿易暨可塗設計</div>
         <button class="start-btn" onclick="enterGame()">👉 進入會場</button>
-        <p style="margin-top: 20px; color: #ccc;">點擊按鈕開啟音樂與遊戲</p>
     </div>
 
     <audio id="bgm" loop>
@@ -290,36 +296,30 @@
     </audio>
 
     <header>
-        <h1>有集貿易暨可塗設計</h1>
-        <div class="subtitle">聖誕節交換禮物遊戲 🎄</div>
-        <button class="audio-control" id="bgmBtn" onclick="toggleBGM()">🎵 音樂：開</button>
+        <div class="company-title">有集貿易暨可塗設計</div>
+        <h1>聖誕節交換禮物遊戲</h1>
     </header>
 
     <div class="container">
         <div class="controls">
             <div class="input-group">
                 <label>🔢 快速產生號碼</label>
-                <input type="number" id="countInput" placeholder="人數" min="2">
+                <input type="number" id="countInput" placeholder="輸入人數" min="2">
                 <button class="btn-small" onclick="fastGenerate()">產生</button>
             </div>
 
             <label>📝 參加名單</label>
             <textarea id="namesInput" placeholder="001&#10;002&#10;王小明..."></textarea>
             
-            <button class="btn btn-setup" onclick="initWheel()">🔄 更新轉盤設定</button>
+            <button class="btn btn-setup" onclick="initWheel()">🔄 設定轉盤</button>
             <div class="status" id="statusText">等待設定...</div>
             
             <button class="btn btn-spin" id="spinBtn" onclick="startSpin()" disabled>🎰 開始抽獎</button>
-            
-            <div style="margin-top:20px; font-size: 0.8rem; color: #ccc;">
-                * 抽中後號碼自動移除<br>
-                * 請確保音樂已開啟
-            </div>
         </div>
 
         <div class="wheel-wrapper">
             <div class="pointer"></div>
-            <canvas id="wheelCanvas" width="500" height="500"></canvas>
+            <canvas id="wheelCanvas" width="550" height="550"></canvas>
         </div>
     </div>
 
@@ -347,35 +347,21 @@
         const spinBtn = document.getElementById('spinBtn');
         const statusText = document.getElementById('statusText');
         const bgm = document.getElementById('bgm');
-        const bgmBtn = document.getElementById('bgmBtn');
-        
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        // 進入遊戲：處理瀏覽器音效限制
+        let spinCount = 0; // 計算抽獎次數，判斷單雙輪
+
         function enterGame() {
-            // 1. 播放背景音樂
             bgm.volume = 0.5;
-            bgm.play().then(() => {
-                bgmBtn.classList.add('playing');
-                bgmBtn.innerHTML = "🎵 音樂：開";
-            }).catch(e => {
-                console.log("音樂播放失敗，請手動開啟");
-            });
+            bgm.play().catch(e => console.log("播放失敗", e));
+            if (audioCtx.state === 'suspended') audioCtx.resume();
 
-            // 2. 喚醒音效引擎 (Safari 需要)
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-
-            // 3. 隱藏開場畫面
             const screen = document.getElementById('startScreen');
             screen.style.opacity = '0';
-            setTimeout(() => {
-                screen.style.display = 'none';
-            }, 500);
+            setTimeout(() => { screen.style.display = 'none'; }, 500);
         }
 
-        // 音效產生器
+        // 音效
         function playTickSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
@@ -407,6 +393,7 @@
             });
         }
 
+        // 轉盤邏輯
         let participants = [];
         let colors = [];
         let startAngle = 0;
@@ -417,33 +404,13 @@
         let isSpinning = false;
         let currentRotation = 0;
 
-        const palette = [
-            '#E63946', '#F1FAEE', '#A8DADC', '#457B9D', '#1D3557',
-            '#F4A261', '#2A9D8F', '#E9C46A', '#FF006E', '#8338EC'
-        ];
-
-        function toggleBGM() {
-            if (bgm.paused) {
-                bgm.play();
-                bgmBtn.innerHTML = "🎵 音樂：開";
-                bgmBtn.classList.add('playing');
-            } else {
-                bgm.pause();
-                bgmBtn.innerHTML = "🎵 音樂：關";
-                bgmBtn.classList.remove('playing');
-            }
-        }
+        const palette = ['#E63946', '#F1FAEE', '#A8DADC', '#457B9D', '#1D3557', '#F4A261', '#2A9D8F', '#E9C46A', '#FF006E', '#8338EC'];
 
         function fastGenerate() {
             const count = parseInt(document.getElementById('countInput').value);
-            if (!count || count < 2) {
-                alert("請輸入至少 2 人");
-                return;
-            }
+            if (!count || count < 2) { alert("請輸入至少 2 人"); return; }
             let arr = [];
-            for(let i=1; i<=count; i++) {
-                arr.push(String(i).padStart(3, '0'));
-            }
+            for(let i=1; i<=count; i++) arr.push(String(i).padStart(3, '0'));
             document.getElementById('namesInput').value = arr.join('\n');
             initWheel();
         }
@@ -451,35 +418,28 @@
         function initWheel() {
             const rawInput = document.getElementById('namesInput').value;
             participants = rawInput.split(/\n|,/).map(s => s.trim()).filter(s => s !== "");
-
-            if (participants.length < 2) {
-                alert("名單至少需要 2 人！");
-                return;
-            }
+            if (participants.length < 2) { alert("名單至少需要 2 人！"); return; }
 
             colors = participants.map((_, i) => palette[i % palette.length]);
             arc = Math.PI * 2 / participants.length;
             startAngle = 0;
             currentRotation = 0;
             drawWheel();
-            
             spinBtn.disabled = false;
             statusText.innerText = `目前人數：${participants.length} 人`;
-            statusText.style.color = '#FFD700';
         }
 
         function drawWheel() {
             if (participants.length === 0) return;
-            const outsideRadius = 240;
-            const textRadius = 160;
+            const outsideRadius = 260;
+            const textRadius = 170;
             const insideRadius = 0;
 
-            ctx.clearRect(0, 0, 500, 500);
-            
+            ctx.clearRect(0, 0, 550, 550);
             ctx.save();
-            ctx.translate(250, 250);
+            ctx.translate(275, 275);
             ctx.rotate(currentRotation);
-            ctx.translate(-250, -250);
+            ctx.translate(-275, -275);
 
             ctx.strokeStyle = "white";
             ctx.lineWidth = 2;
@@ -487,25 +447,19 @@
 
             for(let i = 0; i < participants.length; i++) {
                 const angle = startAngle + i * arc;
-                
                 ctx.fillStyle = colors[i];
                 ctx.beginPath();
-                ctx.arc(250, 250, outsideRadius, angle, angle + arc, false);
-                ctx.arc(250, 250, insideRadius, angle + arc, angle, true);
+                ctx.arc(275, 275, outsideRadius, angle, angle + arc, false);
+                ctx.arc(275, 275, insideRadius, angle + arc, angle, true);
                 ctx.stroke();
                 ctx.fill();
 
                 ctx.save();
-                ctx.fillStyle = (colors[i] === '#F1FAEE' || colors[i] === '#E9C46A' || colors[i] === '#A8DADC') ? '#1D3557' : 'white';
-                
-                ctx.translate(250 + Math.cos(angle + arc / 2) * textRadius, 
-                            250 + Math.sin(angle + arc / 2) * textRadius);
+                ctx.fillStyle = (colors[i] === '#F1FAEE' || colors[i] === '#E9C46A') ? '#1D3557' : 'white';
+                ctx.translate(275 + Math.cos(angle + arc / 2) * textRadius, 275 + Math.sin(angle + arc / 2) * textRadius);
                 ctx.rotate(angle + arc / 2 + Math.PI / 2);
-                
                 const text = participants[i];
-                if(text.length > 5) ctx.font = 'bold 16px Helvetica, Arial';
-                else ctx.font = 'bold 24px Helvetica, Arial';
-                
+                ctx.font = text.length > 5 ? 'bold 18px Helvetica, Arial' : 'bold 26px Helvetica, Arial';
                 ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
                 ctx.restore();
             }
@@ -514,36 +468,22 @@
 
         function startSpin() {
             if (isSpinning) return;
-            
-            // 確保音效引擎運行
             if (audioCtx.state === 'suspended') audioCtx.resume();
-
             isSpinning = true;
             spinBtn.disabled = true;
             spinAngleStart = Math.random() * 0.2 + 0.3;
             spinTime = 0;
             spinTimeTotal = Math.random() * 3000 + 5000;
-            
             requestAnimationFrame(rotateWheel);
         }
 
         let lastSoundAngle = 0;
-
         function rotateWheel() {
             spinTime += 20;
-            if(spinTime >= spinTimeTotal) {
-                stopRotateWheel();
-                return;
-            }
-            
+            if(spinTime >= spinTimeTotal) { stopRotateWheel(); return; }
             const spinAngle = (spinAngleStart * (1 - spinTime / spinTimeTotal));
             currentRotation += spinAngle;
-            
-            if (currentRotation - lastSoundAngle > 0.4) {
-                playTickSound();
-                lastSoundAngle = currentRotation;
-            }
-
+            if (currentRotation - lastSoundAngle > 0.4) { playTickSound(); lastSoundAngle = currentRotation; }
             drawWheel();
             requestAnimationFrame(rotateWheel);
         }
@@ -556,27 +496,51 @@
             const arcd = arc * 180 / Math.PI;
             const index = Math.floor((360 - (degrees % 360)) % 360 / arcd);
             
-            const winner = participants[index];
-            
-            document.getElementById('winnerText').innerText = winner;
+            // 顯示結果
+            document.getElementById('winnerText').innerText = participants[index];
             document.getElementById('resultModal').style.display = 'flex';
             window.winnerIndex = index;
+
+            // --- 觸發動畫 ---
+            spinCount++; // 增加輪次
+            triggerEventAnimation(spinCount);
+        }
+
+        function triggerEventAnimation(round) {
+            // 清除之前的動畫 class 以便重新觸發
+            const santa = document.getElementById('santaClaus');
+            const bells = document.getElementById('bells');
+            
+            santa.classList.remove('anim-fly-right');
+            bells.classList.remove('anim-drop-down');
+
+            // 強制重繪 (Reflow)
+            void santa.offsetWidth;
+            void bells.offsetWidth;
+
+            if (round % 2 !== 0) {
+                // 單數：聖誕老人 (左 -> 右)
+                santa.classList.add('anim-fly-right');
+            } else {
+                // 雙數：鈴鐺 (上 -> 下)
+                bells.classList.add('anim-drop-down');
+            }
         }
 
         function confirmWinner() {
             participants.splice(window.winnerIndex, 1);
             colors.splice(window.winnerIndex, 1);
-            
             document.getElementById('resultModal').style.display = 'none';
             
             if (participants.length > 0) {
                 arc = Math.PI * 2 / participants.length;
-                startAngle = 0;
-                currentRotation = 0;
-                lastSoundAngle = 0;
+                startAngle = 0; currentRotation = 0; lastSoundAngle = 0;
                 drawWheel();
                 statusText.innerText = `目前人數：${participants.length} 人`;
                 spinBtn.disabled = false;
+            } else {
+                // 不可能發生，因為剩一人會進下面的邏輯，但以防萬一
+                spinBtn.disabled = true;
             }
 
             if (participants.length === 1) {
@@ -590,8 +554,8 @@
         }
         
         function closeEndModal() { document.getElementById('endModal').style.display = 'none'; }
-        
         drawWheel();
     </script>
 </body>
 </html>
+
