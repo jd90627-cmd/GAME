@@ -526,8 +526,8 @@
             const santa = document.getElementById('santaClaus');
             const bells = document.getElementById('bells');
             
-            // 重置動畫
-            santa.classList.remove('anim-fly-right');
+            // 重置動畫：移除新的類別名
+            santa.classList.remove('anim-fly-left');
             bells.classList.remove('anim-drop-down');
             
             // 強制瀏覽器重繪 (Reflow) 以便重新觸發動畫
@@ -535,14 +535,14 @@
             void bells.offsetWidth;
 
             if (round % 2 !== 0) {
-                // 單數：聖誕老人與雪橇
-                santa.classList.add('anim-fly-right');
+                // 單數輪次：聖誕老人 (從右飛向左)
+                santa.classList.add('anim-fly-left');
             } else {
-                // 雙數：鈴鐺
+                // 雙數輪次：鈴鐺 (從上掉落)
                 bells.classList.add('anim-drop-down');
             }
         }
-
+        
         function confirmWinner() {
             participants.splice(window.winnerIndex, 1);
             colors.splice(window.winnerIndex, 1);
@@ -571,5 +571,6 @@
     </script>
 </body>
 </html>
+
 
 
