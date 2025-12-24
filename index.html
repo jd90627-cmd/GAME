@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>有集貿易暨可塗設計--聖誕節交換禮物遊戲</title>
+    <style>
+        :root {
+            --primary-color: #E63946; /* 聖誕紅 */
+            --bg-gradient: linear-gradient(135deg, #1D3557 0%, #457b9d 100%);
+            --accent-color: #F1FAEE; /* 雪白 */
+            --gold: #FFD700;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, "Microsoft JhengHei", sans-serif;
+            background: var(--bg-gradient);
+            color: var(--accent-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            color: var(--gold);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            width: 95%;
+            max-width: 1200px;
+            margin-top: 30px;
+            padding-bottom: 50px;
+        }
+
+        /* 左側控制區 */
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            width: 300px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-setup {
+            background-color: #457b9d;
+            color: white;
+        }
+
+        .btn-spin {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(230, 57, 70, 0.4);
+            margin-top: 20px;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn:disabled {
+            background-color: #888;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* 右側轉盤區 */
+        .wheel-wrapper {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            max-width: 90vw;
+            max-height: 90vw;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            transition: transform 4s cubic-bezier(0.1, 0.7, 0.1, 1); /* 轉動動畫 */
+        }
+
+        /* 指針 */
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-top: 50px solid var(--gold);
+            z-index: 10;
+            filter: drop-shadow(0 4px 2px rgba(0,0,0,0.3));
+        }
+
+        /* 結果彈窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal-content {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .winner-title {
+            font-size: 1.5rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .winner-text {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin: 15px 0;
+            word-break: break-all;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .status {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--gold);
+            font-weight: bold;
+        }
+        
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            .container { flex-direction: column-reverse; align-items: center; }
+            .controls { width: 90%; }
+            .wheel-wrapper { width: 350px; height: 350px; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>有集貿易暨可塗設計</h1>
+        <div class="subtitle">聖誕節交換禮物遊戲 🎄</div>
+    </header>
+
+    <div class="container">
+        <div class="controls">
+            <label>📝 參加名單</label>
+            <textarea id="namesInput" placeholder="請輸入號碼或姓名&#10;一行一個&#10;例如：&#10;001&#10;002&#10;王大明"></textarea>
+            
+            <button class="btn btn-setup" onclick="initWheel()">🔄 設定/重置轉盤</button>
+            <div class="status" id="statusText">等待設定...</div>
+            
+            <button class="btn btn-spin" id="spinBtn" onclick="startSpin()" disabled>🎰 開始抽獎</button>
+            
+            <div style="margin-top:20px; font-size: 0.8rem; color: #ccc;">
+                * 抽中後會自動移除該號碼<br>
+                * 直到剩最後一人自動結束
+            </div>
+        </div>
+
+        <div class="wheel-wrapper">
+            <div class="pointer"></div>
+            <canvas id="wheelCanvas" width="500" height="500"></canvas>
+        </div>
+    </div>
+
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <div class="winner-title">🎉 恭喜抽中！</div>
+            <div class="winner-text" id="winnerText">???</div>
+            <p>此號碼將從轉盤中移除</p>
+            <button class="btn btn-setup" onclick="confirmWinner()">確認 (下一位)</button>
+        </div>
+    </div>
+
+    <div class="modal" id="endModal">
+        <div class="modal-content">
+            <div class="winner-title">🎈 遊戲結束</div>
+            <div class="winner-text" style="color:var(--secondary-color)" id="lastPerson"></div>
+            <p>是最後留下的幸運兒！</p>
+            <button class="btn btn-setup" onclick="closeEndModal()">關閉</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const statusText = document.getElementById('statusText');
+        
+        let participants = [];
+        let colors = [];
+        let startAngle = 0;
+        let arc = 0;
+        let spinTimeout = null;
+        let spinAngleStart = 10;
+        let spinTime = 0;
+        let spinTimeTotal = 0;
+        let isSpinning = false;
+
+        // 豐富的配色表
+        const palette = [
+            '#E63946', '#F1FAEE', '#A8DADC', '#457B9D', '#1D3557',
+            '#F4A261', '#2A9D8F', '#E9C46A', '#FF006E', '#8338EC'
+        ];
+
+        function initWheel() {
+            const rawInput = document.getElementById('namesInput').value;
+            // 過濾空白行
+            participants = rawInput.split(/\n|,/).map(s => s.trim()).filter(s => s !== "");
+
+            if (participants.length < 2) {
+                alert("請至少輸入兩個號碼或名字！");
+                return;
+            }
+
+            // 分配顏色
+            colors = participants.map((_, i) => palette[i % palette.length]);
+            
+            arc = Math.PI * 2 / participants.length;
+            startAngle = 0;
+            drawWheel();
+            
+            spinBtn.disabled = false;
+            statusText.innerText = `目前人數：${participants.length} 人`;
+            statusText.style.color = '#FFD700';
+        }
+
+        function drawWheel() {
+            if (participants.length === 0) return;
+
+            const outsideRadius = 240;
+            const textRadius = 160;
+            const insideRadius = 0;
+
+            ctx.clearRect(0, 0, 500, 500);
+
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+
+            ctx.font = 'bold 24px Helvetica, Arial';
+
+            for(let i = 0; i < participants.length; i++) {
+                const angle = startAngle + i * arc;
+                
+                // 畫扇形
+                ctx.fillStyle = colors[i];
+                ctx.beginPath();
+                ctx.arc(250, 250, outsideRadius, angle, angle + arc, false);
+                ctx.arc(250, 250, insideRadius, angle + arc, angle, true);
+                ctx.stroke();
+                ctx.fill();
+
+                // 畫文字
+                ctx.save();
+                ctx.fillStyle = (i % 2 === 0 && colors[i] === '#F1FAEE') ? '#1D3557' : 'white'; // 若背景白則字深藍
+                
+                // 修正文字配色邏輯：簡單反色
+                if (colors[i] === '#F1FAEE' || colors[i] === '#E9C46A') {
+                    ctx.fillStyle = '#1D3557';
+                }
+
+                ctx.translate(250 + Math.cos(angle + arc / 2) * textRadius, 
+                            250 + Math.sin(angle + arc / 2) * textRadius);
+                ctx.rotate(angle + arc / 2 + Math.PI / 2);
+                const text = participants[i];
+                // 如果字太長稍微縮小
+                if(text.length > 5) ctx.font = 'bold 18px Helvetica, Arial';
+                else ctx.font = 'bold 24px Helvetica, Arial';
+                
+                ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
+                ctx.restore();
+            }
+        }
+
+        function startSpin() {
+            if (isSpinning) return;
+            isSpinning = true;
+            spinBtn.disabled = true;
+
+            // 隨機旋轉時間與角度
+            spinAngleStart = Math.random() * 10 + 10;
+            spinTime = 0;
+            spinTimeTotal = Math.random() * 3000 + 4000; // 4到7秒
+            rotateWheel();
+        }
+
+        function rotateWheel() {
+            spinTime += 30;
+            if(spinTime >= spinTimeTotal) {
+                stopRotateWheel();
+                return;
+            }
+            // 緩動函數 easeOut
+            const spinAngle = spinAngleStart - (spinAngleStart * (spinTime / spinTimeTotal)); // 減速
+            startAngle += (spinAngle * Math.PI / 180);
+            drawWheel();
+            spinTimeout = requestAnimationFrame(rotateWheel);
+        }
+
+        function stopRotateWheel() {
+            isSpinning = false;
+            
+            // 計算指針指向的角度（指針在上方，即270度或-90度位置，但Canvas 0度在右邊）
+            // 這裡透過計算剩餘角度來判斷
+            const degrees = startAngle * 180 / Math.PI + 90;
+            const arcd = arc * 180 / Math.PI;
+            const index = Math.floor((360 - (degrees % 360)) % 360 / arcd);
+            
+            const winner = participants[index];
+            
+            // 顯示結果
+            document.getElementById('winnerText').innerText = winner;
+            document.getElementById('resultModal').style.display = 'flex';
+            
+            // 暫存 index 以便移除
+            window.winnerIndex = index;
+        }
+
+        function confirmWinner() {
+            // 移除該中獎者
+            participants.splice(window.winnerIndex, 1);
+            colors.splice(window.winnerIndex, 1);
+            
+            document.getElementById('resultModal').style.display = 'none';
+            
+            // 重新計算角度
+            if (participants.length > 0) {
+                arc = Math.PI * 2 / participants.length;
+                startAngle = 0; // 重置角度讓畫面好看一點，或者保留也可以
+                drawWheel();
+                statusText.innerText = `目前人數：${participants.length} 人`;
+                spinBtn.disabled = false;
+            }
+
+            // 檢查是否只剩最後一人
+            if (participants.length === 1) {
+                setTimeout(() => {
+                    document.getElementById('lastPerson').innerText = participants[0];
+                    document.getElementById('endModal').style.display = 'flex';
+                    spinBtn.disabled = true;
+                    statusText.innerText = "遊戲結束";
+                }, 500);
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('resultModal').style.display = 'none';
+        }
+
+        function closeEndModal() {
+            document.getElementById('endModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
