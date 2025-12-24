@@ -22,53 +22,56 @@
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
-            overflow-y: hidden; /* 防止動畫導致卷軸出現 */
+            overflow-y: hidden;
         }
 
-        /* --- 動畫角色圖片 (隱藏備用) --- */
+        /* --- 動畫角色 (改用 Emoji 以確保顯示) --- */
         .anim-actor {
             position: fixed;
-            z-index: 2000; /* 在最上層 */
+            z-index: 2000;
             display: none;
-            pointer-events: none; /* 讓滑鼠可以穿透圖片點擊下方按鈕 */
+            pointer-events: none;
+            font-size: 150px; /* 控制圖案大小 */
+            line-height: 1;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
         }
 
         /* 聖誕老人動畫設定 */
         #santaClaus {
-            width: 400px; /* 大小 */
             top: 20%;
-            left: -500px;
+            left: -300px;
+            white-space: nowrap; /* 防止換行 */
         }
         .anim-fly-right {
             display: block !important;
-            animation: flyRight 4s linear forwards;
+            animation: flyRight 5s linear forwards;
         }
         @keyframes flyRight {
-            0% { left: -500px; transform: translateY(0); }
-            25% { transform: translateY(-20px); }
-            50% { transform: translateY(0); }
-            75% { transform: translateY(20px); }
-            100% { left: 100vw; transform: translateY(0); }
+            0% { left: -300px; transform: translateY(0) rotate(0deg); }
+            20% { transform: translateY(-30px) rotate(5deg); }
+            40% { transform: translateY(0) rotate(0deg); }
+            60% { transform: translateY(30px) rotate(-5deg); }
+            80% { transform: translateY(0) rotate(0deg); }
+            100% { left: 100vw; transform: translateY(-50px); }
         }
 
         /* 鈴鐺動畫設定 */
         #bells {
-            width: 250px;
             top: -300px;
-            left: 50%; /* 置中掉落 */
+            left: 50%;
             transform: translateX(-50%);
         }
         .anim-drop-down {
             display: block !important;
-            animation: dropDown 3s ease-in-out forwards;
+            animation: dropDown 3.5s ease-in-out forwards;
         }
         @keyframes dropDown {
             0% { top: -300px; opacity: 0; }
-            20% { top: 20%; opacity: 1; transform: translateX(-50%) rotate(10deg); }
-            40% { transform: translateX(-50%) rotate(-10deg); }
-            60% { transform: translateX(-50%) rotate(5deg); }
-            80% { top: 20%; opacity: 1; }
-            100% { top: 120vh; opacity: 0; }
+            15% { top: 25%; opacity: 1; transform: translateX(-50%) rotate(15deg); }
+            30% { transform: translateX(-50%) rotate(-10deg); }
+            45% { transform: translateX(-50%) rotate(5deg); }
+            60% { top: 25%; opacity: 1; transform: translateX(-50%) rotate(0deg); }
+            100% { top: 120vh; opacity: 0; transform: translateX(-50%); }
         }
 
         /* --- 開場畫面 --- */
@@ -106,7 +109,6 @@
             100% { box-shadow: 0 0 0 20px rgba(230, 57, 70, 0); transform: scale(1); }
         }
 
-        /* --- 標題區域調整 (依需求修改) --- */
         header {
             text-align: center;
             padding: 30px 20px;
@@ -116,7 +118,7 @@
         }
 
         .company-title {
-            font-size: 1.5rem; /* 較小 */
+            font-size: 1.5rem;
             color: var(--gold);
             letter-spacing: 3px;
             font-weight: normal;
@@ -126,14 +128,13 @@
 
         h1 {
             margin: 0;
-            font-size: 4rem; /* 較大 */
+            font-size: 4rem;
             text-shadow: 0 4px 10px rgba(0,0,0,0.6);
             color: white;
             font-weight: 900;
             line-height: 1.2;
         }
 
-        /* --- 容器與佈局 --- */
         .container {
             display: flex;
             flex-wrap: wrap;
@@ -203,7 +204,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .btn-spin:active { transform: scale(0.98); }
         .btn:disabled { background-color: #888; cursor: not-allowed; opacity: 0.6; }
 
@@ -236,7 +236,6 @@
             filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4));
         }
 
-        /* 結果彈窗 */
         .modal {
             display: none;
             position: fixed;
@@ -247,7 +246,7 @@
             background: rgba(0,0,0,0.8);
             justify-content: center;
             align-items: center;
-            z-index: 1000; /* 比動畫層級低一點，讓動畫飛在上面，或可調整 */
+            z-index: 1000;
         }
 
         .modal-content {
@@ -275,15 +274,14 @@
             .container { flex-direction: column-reverse; align-items: center; }
             .controls { width: 90%; }
             .wheel-wrapper { width: 350px; height: 350px; }
-            #santaClaus { width: 250px; }
-            #bells { width: 150px; }
+            .anim-actor { font-size: 100px; } /* 手機版圖案小一點 */
         }
     </style>
 </head>
 <body>
 
-    <img id="santaClaus" class="anim-actor" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Santa_Claus_sleigh_reindeer.svg/1280px-Santa_Claus_sleigh_reindeer.svg.png" alt="Santa">
-    <img id="bells" class="anim-actor" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Christmas_mistletoe.svg/1024px-Christmas_mistletoe.svg.png" alt="Bells">
+    <div id="santaClaus" class="anim-actor">🦌🛷🎅💨</div>
+    <div id="bells" class="anim-actor">🔔🎄🎁</div>
 
     <div id="startScreen">
         <h1 style="font-size: 5rem; margin-bottom: 10px;">🎄 尾牙抽獎</h1>
@@ -349,7 +347,7 @@
         const bgm = document.getElementById('bgm');
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        let spinCount = 0; // 計算抽獎次數，判斷單雙輪
+        let spinCount = 0; // 計算抽獎次數
 
         function enterGame() {
             bgm.volume = 0.5;
@@ -501,28 +499,28 @@
             document.getElementById('resultModal').style.display = 'flex';
             window.winnerIndex = index;
 
-            // --- 觸發動畫 ---
-            spinCount++; // 增加輪次
+            // --- 觸發動畫 (修正版) ---
+            spinCount++; 
             triggerEventAnimation(spinCount);
         }
 
         function triggerEventAnimation(round) {
-            // 清除之前的動畫 class 以便重新觸發
             const santa = document.getElementById('santaClaus');
             const bells = document.getElementById('bells');
             
+            // 重置動畫
             santa.classList.remove('anim-fly-right');
             bells.classList.remove('anim-drop-down');
-
-            // 強制重繪 (Reflow)
+            
+            // 強制瀏覽器重繪 (Reflow) 以便重新觸發動畫
             void santa.offsetWidth;
             void bells.offsetWidth;
 
             if (round % 2 !== 0) {
-                // 單數：聖誕老人 (左 -> 右)
+                // 單數：聖誕老人與雪橇
                 santa.classList.add('anim-fly-right');
             } else {
-                // 雙數：鈴鐺 (上 -> 下)
+                // 雙數：鈴鐺
                 bells.classList.add('anim-drop-down');
             }
         }
@@ -538,9 +536,6 @@
                 drawWheel();
                 statusText.innerText = `目前人數：${participants.length} 人`;
                 spinBtn.disabled = false;
-            } else {
-                // 不可能發生，因為剩一人會進下面的邏輯，但以防萬一
-                spinBtn.disabled = true;
             }
 
             if (participants.length === 1) {
@@ -558,4 +553,3 @@
     </script>
 </body>
 </html>
-
